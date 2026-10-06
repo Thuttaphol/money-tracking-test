@@ -8,3 +8,7 @@ node_modules/
 /playwright/.auth/
 
 .DS_Store
+
+.env.local
+.env.develop
+.env.staging

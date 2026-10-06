@@ -60,6 +60,11 @@ export default defineConfig({
       dependencies: ["setup"],
     },
 
+    {
+      name: "api-test",
+      testMatch: /api\/.*\.spec\.ts/,
+    },
+
     // {
     //   name: 'firefox',
     //   use: { ...devices['Desktop Firefox'] },
