@@ -1,9 +1,9 @@
 export const localData = {
-  categories: {
-    salary: { id: 1, name: "เงินเดือน", transactionType: "Income" },
-    selling: { id: 2, name: "ขายของ", transactionType: "Income" },
-    food: { id: 1, name: "อาหาร", transactionType: "Expense" },
-    transport: { id: 1, name: "เดินทาง", transactionType: "Expense" },
-    grocery: { id: 1, name: "ของใช้ทั่วไป", transactionType: "Expense" },
-  },
+  categories: [
+    { id: 1, name: "เงินเดือน", transactionType: "Income" },
+    { id: 2, name: "ขายของ", transactionType: "Income" },
+    { id: 3, name: "อาหาร", transactionType: "Expense" },
+    { id: 4, name: "เดินทาง", transactionType: "Expense" },
+    { id: 5, name: "ของใช้ทั่วไป", transactionType: "Expense" },
+  ],
 };

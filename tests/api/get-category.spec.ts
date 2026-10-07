@@ -1,9 +1,13 @@
 import { test, expect } from "@playwright/test";
 import { environment } from "../../config/environment";
 
+import { createCategories, deleteCategories } from "../../data/test-data-helper";
+import { testData } from "../../data/test-data";
+
 let ACCESS_TOKEN: string;
 
 test.describe("Get category", () => {
+  test.describe.configure({ mode: "default" });
   test.beforeAll(async ({ request }) => {
     const response = await request.post(`${environment.apiUrl}/api/auth/login`, {
       data: {
@@ -17,6 +21,12 @@ test.describe("Get category", () => {
     const responseBody = await response.json();
 
     ACCESS_TOKEN = responseBody.accessToken;
+
+    await createCategories(testData.categories);
+  });
+
+  test.afterAll(async () => {
+    await deleteCategories(testData.categories);
   });
 
   test("get category successfully", async ({ request }) => {

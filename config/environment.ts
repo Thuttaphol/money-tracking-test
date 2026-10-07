@@ -48,6 +48,7 @@ export const environment = {
   databaseUrl: required("DATABASE_URL"),
 
   testUser: {
+    id: process.env.TEST_USER_ID,
     email: process.env.TEST_USER_EMAIL,
     password: process.env.TEST_USER_PASSWORD,
   },
