@@ -20,6 +20,12 @@ if (!supportedEnvironments.includes(testEnvironment)) {
   );
 }
 
+if (testEnvironment === "production") {
+  throw new Error(
+    "Direct database access is not allowed in production environment.",
+  );
+}
+
 dotenv.config({
   path: path.resolve(process.cwd(), `.env.${testEnvironment}`),
 });
@@ -38,8 +44,8 @@ export const environment = {
   name: testEnvironment,
 
   webUrl: required("WEB_URL"),
-
   apiUrl: required("API_URL"),
+  databaseUrl: required("DATABASE_URL"),
 
   testUser: {
     email: process.env.TEST_USER_EMAIL,
