@@ -45,6 +45,7 @@ export async function deleteCategories(categories: CreateCategoryData[]) {
   const query = `
   DELETE FROM money.category
   WHERE id IN (${placeholder})
+  AND app_user_id = '${environment.testUser.id}'
   `;
 
   const result = await db.query(query, values);
