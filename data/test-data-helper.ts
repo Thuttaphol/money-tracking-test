@@ -52,3 +52,15 @@ export async function deleteCategories(categories: CreateCategoryData[]) {
 
   return result.rows;
 }
+
+export async function deleteCategory(id: number, userId: string) {
+  const query = `
+  DELETE FROM money.category
+  WHERE id = '${id}'
+  AND app_user_id = '${userId}'
+  `;
+
+  const result = await db.query(query);
+
+  return result.rows;
+}
