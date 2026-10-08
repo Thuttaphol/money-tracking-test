@@ -1,8 +1,9 @@
 import { test, expect } from "@playwright/test";
 import { environment } from "../../config/environment";
 import {
-  CreateCategoryInvalidTransactionType,
-  CreateCategoryResponse,
+  CategoryErrorInvalidName,
+  CategoryErrorInvalidTransactionType,
+  CategoryResponse,
 } from "../../zod/category-response.schema";
 import { deleteCategory } from "../../data/test-data-helper";
 
@@ -42,7 +43,7 @@ test.describe("Create category", () => {
 
     const data = await response.json();
 
-    const result = CreateCategoryResponse.safeParse(data);
+    const result = CategoryResponse.safeParse(data);
 
     expect(result.success).toBe(true);
 
@@ -66,7 +67,7 @@ test.describe("Create category", () => {
 
     const data = await response.json();
 
-    const result = CreateCategoryResponse.safeParse(data);
+    const result = CategoryResponse.safeParse(data);
 
     expect(result.success).toBe(true);
 
@@ -90,7 +91,7 @@ test.describe("Create category", () => {
 
     const data = await response.json();
 
-    const result = CreateCategoryInvalidTransactionType.safeParse(data);
+    const result = CategoryErrorInvalidTransactionType.safeParse(data);
 
     expect(result.success).toBe(false);
   });
@@ -110,7 +111,7 @@ test.describe("Create category", () => {
 
     const data = await response.json();
 
-    const result = CreateCategoryInvalidTransactionType.safeParse(data);
+    const result = CategoryErrorInvalidName.safeParse(data);
 
     expect(result.success).toBe(false);
   });

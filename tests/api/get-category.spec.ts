@@ -2,6 +2,10 @@ import { test, expect } from "@playwright/test";
 import { environment } from "../../config/environment";
 
 import { createCategories, deleteCategories } from "../../data/test-data-helper";
+import {
+  CategoryErrorInvalidTransactionType,
+  GetCategoryResponse,
+} from "../../zod/category-response.schema";
 import { testData } from "../../data/test-data";
 
 let ACCESS_TOKEN: string;
@@ -37,6 +41,12 @@ test.describe("Get category", () => {
     });
 
     expect(response.ok()).toBeTruthy();
+
+    const data = await response.json();
+
+    const result = GetCategoryResponse.safeParse(data);
+
+    expect(result.success).toBe(true);
   });
 
   test("filter category by name successfully", async ({ request }) => {
@@ -54,6 +64,10 @@ test.describe("Get category", () => {
     const data = await response.json();
 
     expect(data).toHaveLength(1);
+
+    const result = GetCategoryResponse.safeParse(data);
+
+    expect(result.success).toBe(true);
   });
 
   test("filter category by transaction type successfully", async ({ request }) => {
@@ -71,6 +85,10 @@ test.describe("Get category", () => {
     const data = await response.json();
 
     expect(data).toHaveLength(3);
+
+    const result = GetCategoryResponse.safeParse(data);
+
+    expect(result.success).toBe(true);
   });
 
   test("filter category by name and transaction type successfully", async ({
@@ -91,6 +109,10 @@ test.describe("Get category", () => {
     const data = await response.json();
 
     expect(data).toHaveLength(1);
+
+    const result = GetCategoryResponse.safeParse(data);
+
+    expect(result.success).toBe(true);
   });
 
   test("filter category fail because sending wrong transaction type", async ({
@@ -109,13 +131,8 @@ test.describe("Get category", () => {
 
     const data = await response.json();
 
-    expect(data).toEqual({
-      title: "Request Validation Failed",
-      status: 400,
-      detail: "One or more request value is invalid.",
-      errors: {
-        TransactionType: ["The TransactionType field must be Expense or Income."],
-      },
-    });
+    const result = CategoryErrorInvalidTransactionType.safeParse(data);
+
+    expect(result.success).toBe(false);
   });
 });

@@ -1,12 +1,14 @@
 import * as z from "zod";
 
-export const CreateCategoryResponse = z.object({
+export const CategoryResponse = z.object({
   id: z.number(),
   name: z.string(),
   transactionType: z.string(),
 });
 
-export const CreateCategoryInvalidTransactionType = z.object({
+export const GetCategoryResponse = z.array(CategoryResponse);
+
+export const CategoryErrorInvalidTransactionType = z.object({
   title: z.string(),
   status: z.number(),
   details: z.string(),
@@ -17,7 +19,7 @@ export const CreateCategoryInvalidTransactionType = z.object({
   }),
 });
 
-export const CreateCategoryInvalidName = z.object({
+export const CategoryErrorInvalidName = z.object({
   title: z.string(),
   status: z.number(),
   details: z.string(),
