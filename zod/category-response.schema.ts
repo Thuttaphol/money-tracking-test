@@ -8,6 +8,11 @@ export const CategoryResponse = z.object({
 
 export const GetCategoryResponse = z.array(CategoryResponse);
 
+// CategoryDeleteResponse from /openapi/v1.json.
+export const CategoryDeleteResponse = z.object({
+  isDeleted: z.boolean(),
+});
+
 export const CategoryErrorInvalidTransactionType = z.object({
   title: z.string(),
   status: z.number(),
