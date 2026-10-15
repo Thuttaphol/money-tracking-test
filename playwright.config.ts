@@ -34,9 +34,10 @@ export default defineConfig({
 
   /* Configure projects for major browsers */
   projects: [
-    // Setup project
+    // Setup for login and set authenticated cookie
     { name: "setup", testMatch: /.*\.setup\.ts/ },
 
+    // Test for login flow
     {
       name: "auth",
       testMatch: /authentication\/.*\.spec\.ts/,
@@ -49,6 +50,7 @@ export default defineConfig({
       },
     },
 
+    // Test other flow using authenticated cookie
     {
       name: "authenticated",
       testIgnore: /authentication\/.*\.spec\.ts/,
@@ -60,6 +62,7 @@ export default defineConfig({
       dependencies: ["setup"],
     },
 
+    // Test api
     {
       name: "api-test",
       testMatch: /api\/.*\.spec\.ts/,
