@@ -10,7 +10,6 @@ import { deleteCategory } from "../../data/test-data-helper";
 let ACCESS_TOKEN: string;
 
 test.describe("Create category", () => {
-  test.describe.configure({ mode: "default" });
   test.beforeAll(async ({ request }) => {
     const response = await request.post(`${environment.apiUrl}/api/auth/login`, {
       data: {
