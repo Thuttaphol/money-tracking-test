@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "../../fixtures/access-token.fixture";
 import { environment } from "../../config/environment";
 
 import { createCategories, deleteCategories } from "../../data/test-data-helper";
@@ -8,24 +8,12 @@ import {
 } from "../../zod/category-response.schema";
 import { testData } from "../../data/test-data";
 
-let ACCESS_TOKEN: string;
+const categoryUrl = `${environment.apiUrl}/api/Categories`;
 
 test.describe("Get category", () => {
   test.describe.configure({ mode: "default" });
-  test.beforeAll(async ({ request }) => {
-    const response = await request.post(`${environment.apiUrl}/api/auth/login`, {
-      data: {
-        email: environment.testUser.email,
-        password: environment.testUser.password,
-      },
-    });
 
-    expect(response.ok()).toBeTruthy();
-
-    const responseBody = await response.json();
-
-    ACCESS_TOKEN = responseBody.accessToken;
-
+  test.beforeAll(async () => {
     await createCategories(testData.categories);
   });
 
@@ -33,26 +21,23 @@ test.describe("Get category", () => {
     await deleteCategories(testData.categories);
   });
 
-  test("get category successfully", async ({ request }) => {
-    const response = await request.get(`${environment.apiUrl}/api/Categories`, {
+  test("get category successfully", async ({ request, accessToken }) => {
+    const response = await request.get(categoryUrl, {
       headers: {
-        Authorization: `Bearer ${ACCESS_TOKEN}`,
+        Authorization: `Bearer ${accessToken}`,
       },
     });
 
     expect(response.ok()).toBeTruthy();
-
     const data = await response.json();
-
     const result = GetCategoryResponse.safeParse(data);
-
     expect(result.success).toBe(true);
   });
 
-  test("filter category by name successfully", async ({ request }) => {
-    const response = await request.get(`${environment.apiUrl}/api/Categories`, {
+  test("filter category by name successfully", async ({ request, accessToken }) => {
+    const response = await request.get(categoryUrl, {
       headers: {
-        Authorization: `Bearer ${ACCESS_TOKEN}`,
+        Authorization: `Bearer ${accessToken}`,
       },
       params: {
         name: "เงิน",
@@ -60,20 +45,19 @@ test.describe("Get category", () => {
     });
 
     expect(response.ok()).toBeTruthy();
-
     const data = await response.json();
-
     expect(data).toHaveLength(1);
-
     const result = GetCategoryResponse.safeParse(data);
-
     expect(result.success).toBe(true);
   });
 
-  test("filter category by transaction type successfully", async ({ request }) => {
-    const response = await request.get(`${environment.apiUrl}/api/Categories`, {
+  test("filter category by transaction type successfully", async ({
+    request,
+    accessToken,
+  }) => {
+    const response = await request.get(categoryUrl, {
       headers: {
-        Authorization: `Bearer ${ACCESS_TOKEN}`,
+        Authorization: `Bearer ${accessToken}`,
       },
       params: {
         transactionType: "Expense",
@@ -81,22 +65,19 @@ test.describe("Get category", () => {
     });
 
     expect(response.ok()).toBeTruthy();
-
     const data = await response.json();
-
     expect(data).toHaveLength(3);
-
     const result = GetCategoryResponse.safeParse(data);
-
     expect(result.success).toBe(true);
   });
 
   test("filter category by name and transaction type successfully", async ({
     request,
+    accessToken,
   }) => {
-    const response = await request.get(`${environment.apiUrl}/api/Categories`, {
+    const response = await request.get(categoryUrl, {
       headers: {
-        Authorization: `Bearer ${ACCESS_TOKEN}`,
+        Authorization: `Bearer ${accessToken}`,
       },
       params: {
         name: "เงิน",
@@ -105,22 +86,19 @@ test.describe("Get category", () => {
     });
 
     expect(response.ok()).toBeTruthy();
-
     const data = await response.json();
-
     expect(data).toHaveLength(1);
-
     const result = GetCategoryResponse.safeParse(data);
-
     expect(result.success).toBe(true);
   });
 
   test("filter category fail because sending wrong transaction type", async ({
     request,
+    accessToken,
   }) => {
-    const response = await request.get(`${environment.apiUrl}/api/Categories`, {
+    const response = await request.get(categoryUrl, {
       headers: {
-        Authorization: `Bearer ${ACCESS_TOKEN}`,
+        Authorization: `Bearer ${accessToken}`,
       },
       params: {
         transactionType: "Wrong",
@@ -128,11 +106,8 @@ test.describe("Get category", () => {
     });
 
     expect(response.status()).toEqual(400);
-
     const data = await response.json();
-
     const result = CategoryErrorInvalidTransactionType.safeParse(data);
-
-    expect(result.success).toBe(false);
+    expect(result.success).toBe(true);
   });
 });

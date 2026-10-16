@@ -16,9 +16,9 @@ export const CategoryDeleteResponse = z.object({
 export const CategoryErrorInvalidTransactionType = z.object({
   title: z.string(),
   status: z.number(),
-  details: z.string(),
+  detail: z.string(),
   errors: z.object({
-    transactionType: z.array(
+    TransactionType: z.array(
       z.literal("The TransactionType field must be Expense or Income."),
     ),
   }),
@@ -27,7 +27,7 @@ export const CategoryErrorInvalidTransactionType = z.object({
 export const CategoryErrorInvalidName = z.object({
   title: z.string(),
   status: z.number(),
-  details: z.string(),
+  detail: z.string(),
   errors: z.object({
     Name: z.array(z.literal("The field Name must has length from 3 to 50.")),
   }),
