@@ -32,6 +32,7 @@ test.describe("Get category", () => {
     const data = await response.json();
     const result = GetCategoryResponse.safeParse(data);
     expect(result.success).toBe(true);
+    expect(result.data?.length).toBeGreaterThan(0);
   });
 
   test("filter category by name successfully", async ({ request, accessToken }) => {
@@ -49,6 +50,7 @@ test.describe("Get category", () => {
     expect(data).toHaveLength(1);
     const result = GetCategoryResponse.safeParse(data);
     expect(result.success).toBe(true);
+    expect(result.data?.length).toBeGreaterThan(0);
   });
 
   test("filter category by transaction type successfully", async ({
@@ -69,6 +71,7 @@ test.describe("Get category", () => {
     expect(data).toHaveLength(3);
     const result = GetCategoryResponse.safeParse(data);
     expect(result.success).toBe(true);
+    expect(result.data?.length).toBeGreaterThan(0);
   });
 
   test("filter category by name and transaction type successfully", async ({
@@ -90,6 +93,7 @@ test.describe("Get category", () => {
     expect(data).toHaveLength(1);
     const result = GetCategoryResponse.safeParse(data);
     expect(result.success).toBe(true);
+    expect(result.data?.length).toBeGreaterThan(0);
   });
 
   test("filter category fail because sending wrong transaction type", async ({
