@@ -1,21 +1,19 @@
 import { randomUUID } from "node:crypto";
-import { test as base, expect, type APIRequestContext } from "@playwright/test";
+import type { APIRequestContext } from "@playwright/test";
 import type * as z from "zod";
+import { test as base, expect } from "../../fixtures/access-token.fixture";
 import { environment } from "../../config/environment";
 import { deleteCategory } from "../../data/test-data-helper";
 import {
   ApiErrorResponse,
   ApiValidationErrorResponse,
 } from "../../zod/api-response.schema";
-import { AccessTokenResponse } from "../../zod/auth-response.schema";
 import { CategoryResponse } from "../../zod/category-response.schema";
 
 type Category = z.infer<typeof CategoryResponse>;
 
-let accessToken: string;
-
 const test = base.extend<{ category: Category }>({
-  category: async ({ request }, use) => {
+  category: async ({ request, accessToken }, use) => {
     const response = await request.post(`${environment.apiUrl}/api/Categories`, {
       headers: { Authorization: `Bearer ${accessToken}` },
       data: {
@@ -36,7 +34,11 @@ const test = base.extend<{ category: Category }>({
   },
 });
 
-async function expectStoredCategory(request: APIRequestContext, category: Category) {
+async function expectStoredCategory(
+  request: APIRequestContext,
+  category: Category,
+  accessToken: string,
+) {
   const response = await request.get(
     `${environment.apiUrl}/api/Categories/${category.id}`,
     { headers: { Authorization: `Bearer ${accessToken}` } },
@@ -47,26 +49,17 @@ async function expectStoredCategory(request: APIRequestContext, category: Catego
 }
 
 test.describe("PUT /api/Categories", () => {
-  test.beforeAll(async ({ request }) => {
+  test.beforeAll(async () => {
     if (!environment.testUser.id) {
       throw new Error("TEST_USER_ID is required for category cleanup.");
     }
-
-    const response = await request.post(`${environment.apiUrl}/api/auth/login`, {
-      data: {
-        email: environment.testUser.email,
-        password: environment.testUser.password,
-      },
-    });
-
-    expect(response.status()).toBe(200);
-    accessToken = AccessTokenResponse.parse(await response.json()).accessToken;
   });
 
   for (const transactionType of ["Income", "Expense"] as const) {
     test(`updates a category with transaction type ${transactionType}`, async ({
       request,
       category,
+      accessToken,
     }) => {
       // Start with the opposite type to verify that the type really changes.
       const initialType = transactionType === "Income" ? "Expense" : "Income";
@@ -94,7 +87,7 @@ test.describe("PUT /api/Categories", () => {
 
       expect(response.status()).toBe(200);
       expect(CategoryResponse.parse(await response.json())).toEqual(updatedCategory);
-      await expectStoredCategory(request, updatedCategory);
+      await expectStoredCategory(request, updatedCategory, accessToken);
     });
   }
 
@@ -102,6 +95,7 @@ test.describe("PUT /api/Categories", () => {
     test(`accepts a name with ${length} characters`, async ({
       request,
       category,
+      accessToken,
     }) => {
       const updatedCategory = { ...category, name: "a".repeat(length) };
       const response = await request.put(`${environment.apiUrl}/api/Categories`, {
@@ -111,7 +105,7 @@ test.describe("PUT /api/Categories", () => {
 
       expect(response.status()).toBe(200);
       expect(CategoryResponse.parse(await response.json())).toEqual(updatedCategory);
-      await expectStoredCategory(request, updatedCategory);
+      await expectStoredCategory(request, updatedCategory, accessToken);
     });
   }
 
@@ -154,6 +148,7 @@ test.describe("PUT /api/Categories", () => {
     test(`rejects ${title} without changing the category`, async ({
       request,
       category,
+      accessToken,
     }) => {
       const response = await request.put(`${environment.apiUrl}/api/Categories`, {
         headers: { Authorization: `Bearer ${accessToken}` },
@@ -169,13 +164,14 @@ test.describe("PUT /api/Categories", () => {
             key.toLowerCase() === field.toLowerCase() && messages.length > 0,
         ),
       ).toBe(true);
-      await expectStoredCategory(request, category);
+      await expectStoredCategory(request, category, accessToken);
     });
   }
 
   test("returns 404 for a category that no longer exists", async ({
     request,
     category,
+    accessToken,
   }) => {
     await deleteCategory(category.id, environment.testUser.id!);
 
