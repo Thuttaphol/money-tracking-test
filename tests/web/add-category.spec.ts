@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { test, expect } from "../../fixtures/index.fixture";
-import { AddCategoryPage } from "../../pages/category-add-page";
+import { AddCategoryPage } from "../../page-object-model/category-add-page";
 import { environment } from "../../config/environment";
 
 test("go to add category page successfully", async ({ page }) => {
