@@ -21,11 +21,11 @@ Install pakage by run command `bun install`
 
 ### Test UI (Web mobile)
 
-1. Test without ui
+1. Test api without ui
 
 > `TEST_ENV=local bunx playwright test --project=web-mobile`
 
-2. Test with ui
+2. Test api with ui
 
 > `TEST_ENV=local bunx playwright test --ui --project=web-mobile`
 
