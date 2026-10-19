@@ -35,11 +35,11 @@ export default defineConfig({
   /* Configure projects for major browsers */
   projects: [
     // Setup for login and set authenticated cookie
-    { name: "setup", testMatch: /.*\.setup\.ts/ },
+    { name: "setup-login", testMatch: /setup\/.*\.setup\.ts/ },
 
     // Test for login flow
     {
-      name: "auth",
+      name: "test-auth",
       testMatch: /authentication\/.*\.spec\.ts/,
       use: {
         ...devices["Desktop Chrome"],
@@ -59,13 +59,25 @@ export default defineConfig({
         // Use prepared auth state.
         storageState: "playwright/.auth/user.json",
       },
-      dependencies: ["setup"],
+      dependencies: ["setup-login"],
     },
 
     // Test api
     {
       name: "api-test",
       testMatch: /api\/.*\.spec\.ts/,
+    },
+
+    // Web mobile size test
+    {
+      name: "web-mobile",
+      testMatch: /web\/.*\.spec\.ts/,
+      use: {
+        browserName: "chromium",
+        viewport: { width: 440, height: 956 },
+        storageState: "playwright/.auth/user.json",
+      },
+      dependencies: ["setup-login"],
     },
 
     // {
