@@ -1,7 +1,7 @@
 import { type Locator, type Page } from "@playwright/test";
 import { environment } from "../config/environment";
 
-export class AddCategoryPage {
+export class CategoryAddPage {
   readonly page: Page;
   readonly categoryHeader: Locator;
   readonly nameField: Locator;

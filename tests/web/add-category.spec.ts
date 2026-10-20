@@ -1,10 +1,10 @@
 import { randomUUID } from "node:crypto";
 import { test, expect } from "../../fixtures/index.fixture";
-import { AddCategoryPage } from "../../page-object-model/category-add-page";
+import { CategoryAddPage } from "../../page-object-model/category-add-page";
 import { environment } from "../../config/environment";
 
 test("go to add category page successfully", async ({ page }) => {
-  const categoryPage = new AddCategoryPage(page);
+  const categoryPage = new CategoryAddPage(page);
   await categoryPage.gotoAddCategory();
 
   await expect(categoryPage.categoryHeader).toBeVisible();
@@ -18,7 +18,7 @@ for (const transactionType of ["Income", "Expense"]) {
     getCategory,
     deleteCategory,
   }) => {
-    const categoryPage = new AddCategoryPage(page);
+    const categoryPage = new CategoryAddPage(page);
     await categoryPage.gotoAddCategory();
 
     const categoryName = `สร้างประเภทรายการแบบ ${transactionType} - ${randomUUID().split("-")[0]}`;
