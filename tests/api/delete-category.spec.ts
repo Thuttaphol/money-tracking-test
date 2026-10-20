@@ -9,9 +9,9 @@ import {
   CategoryDeleteResponse,
   CategoryResponse,
 } from "../../zod/category-response.schema";
+import { type TransactionType } from "../../types/transaction";
 
 type Category = z.infer<typeof CategoryResponse>;
-type TransactionType = "Income" | "Expense";
 
 const test = base.extend<{
   createCategory: (transactionType: TransactionType) => Promise<Category>;
@@ -88,7 +88,11 @@ test.describe("DELETE /api/Categories/{categoryId}", () => {
     }) => {
       const category = await createCategory(transactionType);
 
-      const result = await deleteCategoryThroughApi(request, category.id, accessToken);
+      const result = await deleteCategoryThroughApi(
+        request,
+        category.id,
+        accessToken,
+      );
 
       expect(result.isDeleted).toBe(true);
       await expectCategoryMissing(request, category.id, accessToken);
@@ -117,11 +121,19 @@ test.describe("DELETE /api/Categories/{categoryId}", () => {
   }) => {
     const category = await createCategory("Income");
 
-    const firstResult = await deleteCategoryThroughApi(request, category.id, accessToken);
+    const firstResult = await deleteCategoryThroughApi(
+      request,
+      category.id,
+      accessToken,
+    );
     expect(firstResult.isDeleted).toBe(true);
     await expectCategoryMissing(request, category.id, accessToken);
 
-    const secondResult = await deleteCategoryThroughApi(request, category.id, accessToken);
+    const secondResult = await deleteCategoryThroughApi(
+      request,
+      category.id,
+      accessToken,
+    );
     expect(secondResult.isDeleted).toBe(false);
     await expectCategoryMissing(request, category.id, accessToken);
   });

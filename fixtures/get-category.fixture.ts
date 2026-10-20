@@ -1,7 +1,6 @@
 import { test as base, expect } from "./access-token.fixture";
 import { environment } from "../config/environment";
-
-type TransactionType = "Income" | "Expense";
+import { type TransactionType } from "../types/transaction";
 
 type Category = {
   id: number;

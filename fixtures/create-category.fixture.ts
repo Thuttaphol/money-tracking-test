@@ -1,18 +1,6 @@
 import { test as base, expect } from "./access-token.fixture";
 import { environment } from "../config/environment";
-
-type TransactionType = "Income" | "Expense";
-
-type CategoryInput = {
-  name: string;
-  transactionType: TransactionType;
-};
-
-type Category = {
-  id: number;
-  name: string;
-  transactionType: TransactionType;
-};
+import type { Category, CategoryInput } from "../types/category";
 
 type CategoryFixtures = {
   createCategory: (input: CategoryInput) => Promise<Category>;
