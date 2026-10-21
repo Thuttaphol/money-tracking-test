@@ -5,7 +5,8 @@ import { testData } from "../../data/test-data";
 import { type TransactionType } from "../../types/transaction";
 import { Category } from "../../types/category";
 
-test("open category list page and it has transaction success fully", async ({
+test.describe.configure({ mode: "default" });
+test("open category list page and it has category success fully", async ({
   page,
   createCategory,
 }) => {
@@ -29,7 +30,7 @@ test("open category list page and it has transaction success fully", async ({
   });
 });
 
-test("open category list page and it has no transaction success fully", async ({
+test("open category list page and it has no category success fully", async ({
   page,
 }) => {
   const categoryListPage = new CategoryListPage(page);
