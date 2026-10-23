@@ -1,5 +1,6 @@
-import { test as base, expect } from "./access-token.fixture";
-import { environment } from "../config/environment";
+import { test as base } from "./access-token.fixture";
+import { createCategory, deleteCategory } from "../utils/category-helper";
+import { CategoryResponse } from "../zod/category-response.schema";
 import type { Category, CategoryInput } from "../types/category";
 
 type CategoryFixtures = {
@@ -10,40 +11,29 @@ export const test = base.extend<CategoryFixtures>({
   createCategory: async ({ request, accessToken }, use) => {
     const createdCategoryIds: number[] = [];
 
-    const create = async ({
-      name,
-      transactionType,
-    }: CategoryInput): Promise<Category> => {
-      const response = await request.post(`${environment.apiUrl}/api/Categories`, {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-        data: {
-          name,
-          transactionType,
-        },
-      });
+    try {
+      const addCategory = async ({
+        name,
+        transactionType,
+      }: CategoryInput): Promise<Category> => {
+        const category: Category = await createCategory(request, accessToken, {
+          name: name,
+          transactionType: transactionType,
+        });
 
-      expect(response.ok()).toBeTruthy();
-      const category: Category = await response.json();
-      createdCategoryIds.push(category.id);
+        createdCategoryIds.push(category.id);
+        const result = CategoryResponse.parse(category);
 
-      return category;
-    };
+        return result;
+      };
 
-    await use(create);
-
-    for (const id of createdCategoryIds) {
-      const response = await request.delete(
-        `${environment.apiUrl}/api/Categories/${id}`,
-        {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        },
+      await use(addCategory);
+    } finally {
+      await Promise.allSettled(
+        createdCategoryIds.map(
+          async (id) => await deleteCategory(request, accessToken, id),
+        ),
       );
-
-      expect(response.ok()).toBeTruthy();
     }
   },
 });

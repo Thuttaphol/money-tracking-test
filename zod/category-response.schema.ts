@@ -3,7 +3,7 @@ import * as z from "zod";
 export const CategoryResponse = z.object({
   id: z.number(),
   name: z.string(),
-  transactionType: z.string(),
+  transactionType: z.enum(["Income", "Expense"]),
 });
 
 export const GetCategoryResponse = z.array(CategoryResponse);

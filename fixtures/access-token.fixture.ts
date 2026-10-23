@@ -1,5 +1,6 @@
-import { request, test as base, expect } from "@playwright/test";
+import { test as base, request } from "@playwright/test";
 import { environment } from "../config/environment";
+import { getAccessToken } from "../utils/auth-helper";
 
 type AccessTokenFixture = {
   accessToken: string;
@@ -10,18 +11,12 @@ export const test = base.extend<{}, AccessTokenFixture>({
     async ({}, use) => {
       const apiContext = await request.newContext({ baseURL: environment.apiUrl });
 
-      const response = await apiContext.post("/api/auth/login", {
-        data: {
-          email: environment.testUser.email,
-          password: environment.testUser.password,
-        },
-      });
+      try {
+        const accessToken = await getAccessToken(apiContext);
 
-      expect(response.ok()).toBeTruthy();
-
-      const body = await response.json();
-
-      await use(body.accessToken);
+        await use(accessToken);
+      } finally {
+      }
     },
     { scope: "worker" },
   ],
