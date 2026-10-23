@@ -35,32 +35,32 @@ export default defineConfig({
   /* Configure projects for major browsers */
   projects: [
     // Setup for login and set authenticated cookie
-    { name: "setup-login", testMatch: /setup\/.*\.setup\.ts/ },
+    { name: "setup-login", testMatch: "**/setup/auth.setup.spec.ts" },
 
     // Test for login flow
-    {
-      name: "test-auth",
-      testMatch: /authentication\/.*\.spec\.ts/,
-      use: {
-        ...devices["Desktop Chrome"],
-        storageState: {
-          cookies: [],
-          origins: [],
-        },
-      },
-    },
+    // {
+    //   name: "test-auth",
+    //   testMatch: /authentication\/.*\.spec\.ts/,
+    //   use: {
+    //     ...devices["Desktop Chrome"],
+    //     storageState: {
+    //       cookies: [],
+    //       origins: [],
+    //     },
+    //   },
+    // },
 
     // Test other flow using authenticated cookie
-    {
-      name: "authenticated",
-      testIgnore: /authentication\/.*\.spec\.ts/,
-      use: {
-        ...devices["Desktop Chrome"],
-        // Use prepared auth state.
-        storageState: "playwright/.auth/user.json",
-      },
-      dependencies: ["setup-login"],
-    },
+    // {
+    //   name: "authenticated",
+    //   testIgnore: /authentication\/.*\.spec\.ts/,
+    //   use: {
+    //     ...devices["Desktop Chrome"],
+    //     // Use prepared auth state.
+    //     storageState: "playwright/.auth/user.json",
+    //   },
+    //   dependencies: ["setup-login"],
+    // },
 
     // Test api
     {

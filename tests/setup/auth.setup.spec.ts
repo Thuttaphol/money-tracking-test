@@ -18,5 +18,6 @@ setup("login", async ({ page }) => {
 
   // End of authentication steps.
 
+  // Store the authenticated data like cookie
   await page.context().storageState({ path: authFile });
 });
