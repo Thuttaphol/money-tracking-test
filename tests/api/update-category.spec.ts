@@ -1,111 +1,72 @@
 import { randomUUID } from "node:crypto";
-import type { APIRequestContext } from "@playwright/test";
-import type * as z from "zod";
-import { test as base, expect } from "../../fixtures/access-token.fixture";
+import { test, expect } from "../../fixtures/index.fixture";
 import { environment } from "../../config/environment";
-import { deleteCategory } from "../../data/test-data-helper";
 import {
   ApiErrorResponse,
   ApiValidationErrorResponse,
 } from "../../zod/api-response.schema";
 import { CategoryResponse } from "../../zod/category-response.schema";
 
-type Category = z.infer<typeof CategoryResponse>;
-
-const test = base.extend<{ category: Category }>({
-  category: async ({ request, accessToken }, use) => {
-    const response = await request.post(`${environment.apiUrl}/api/Categories`, {
-      headers: { Authorization: `Bearer ${accessToken}` },
-      data: {
-        name: `PUT test ${randomUUID()}`,
-        transactionType: "Expense",
-      },
-    });
-
-    const body = await response.json();
-    const { id } = CategoryResponse.pick({ id: true }).parse(body);
-
-    try {
-      expect(response.status()).toBe(200);
-      await use(CategoryResponse.parse(body));
-    } finally {
-      await deleteCategory(id, environment.testUser.id!);
-    }
-  },
-});
-
-async function expectStoredCategory(
-  request: APIRequestContext,
-  category: Category,
-  accessToken: string,
-) {
-  const response = await request.get(
-    `${environment.apiUrl}/api/Categories/${category.id}`,
-    { headers: { Authorization: `Bearer ${accessToken}` } },
-  );
-
-  expect(response.status()).toBe(200);
-  expect(CategoryResponse.parse(await response.json())).toEqual(category);
-}
+const categoryUrl = `${environment.apiUrl}/api/Categories`;
 
 test.describe("PUT /api/Categories", () => {
-  test.beforeAll(async () => {
-    if (!environment.testUser.id) {
-      throw new Error("TEST_USER_ID is required for category cleanup.");
-    }
-  });
-
   for (const transactionType of ["Income", "Expense"] as const) {
     test(`updates a category with transaction type ${transactionType}`, async ({
       request,
-      category,
+      createCategory,
+      getCategory,
       accessToken,
     }) => {
+      // Arrange
       // Start with the opposite type to verify that the type really changes.
       const initialType = transactionType === "Income" ? "Expense" : "Income";
-      if (category.transactionType !== initialType) {
-        const response = await request.put(`${environment.apiUrl}/api/Categories`, {
-          headers: { Authorization: `Bearer ${accessToken}` },
-          data: { ...category, transactionType: initialType },
-        });
-        expect(response.status()).toBe(200);
-        expect(CategoryResponse.parse(await response.json())).toEqual({
-          ...category,
-          transactionType: initialType,
-        });
-      }
-
+      const category = await createCategory({
+        name: `PUT test ${randomUUID()}`,
+        transactionType: initialType,
+      });
       const updatedCategory = {
         id: category.id,
         name: `หมวดหมู่ ทดสอบ ${transactionType}`,
         transactionType,
       };
-      const response = await request.put(`${environment.apiUrl}/api/Categories`, {
+
+      // Act
+      const response = await request.put(categoryUrl, {
         headers: { Authorization: `Bearer ${accessToken}` },
         data: updatedCategory,
       });
 
+      // Assert
       expect(response.status()).toBe(200);
       expect(CategoryResponse.parse(await response.json())).toEqual(updatedCategory);
-      await expectStoredCategory(request, updatedCategory, accessToken);
+      expect(await getCategory(updatedCategory.name)).toContainEqual(updatedCategory);
     });
   }
 
   for (const length of [3, 50]) {
     test(`accepts a name with ${length} characters`, async ({
       request,
-      category,
+      createCategory,
+      getCategory,
       accessToken,
     }) => {
+      // Arrange
+      const category = await createCategory({
+        name: `PUT test ${randomUUID()}`,
+        transactionType: "Expense",
+      });
       const updatedCategory = { ...category, name: "a".repeat(length) };
-      const response = await request.put(`${environment.apiUrl}/api/Categories`, {
+
+      // Act
+      const response = await request.put(categoryUrl, {
         headers: { Authorization: `Bearer ${accessToken}` },
         data: updatedCategory,
       });
 
+      // Assert
       expect(response.status()).toBe(200);
       expect(CategoryResponse.parse(await response.json())).toEqual(updatedCategory);
-      await expectStoredCategory(request, updatedCategory, accessToken);
+      expect(await getCategory(updatedCategory.name)).toContainEqual(updatedCategory);
     });
   }
 
@@ -147,14 +108,24 @@ test.describe("PUT /api/Categories", () => {
   for (const { title, field, changes } of invalidRequests) {
     test(`rejects ${title} without changing the category`, async ({
       request,
-      category,
+      createCategory,
+      getCategory,
       accessToken,
     }) => {
-      const response = await request.put(`${environment.apiUrl}/api/Categories`, {
+      // Arrange
+      const category = await createCategory({
+        name: `PUT test ${randomUUID()}`,
+        transactionType: "Expense",
+      });
+      const updatedCategory = { ...category, ...changes };
+
+      // Act
+      const response = await request.put(categoryUrl, {
         headers: { Authorization: `Bearer ${accessToken}` },
-        data: { ...category, ...changes },
+        data: updatedCategory,
       });
 
+      // Assert
       expect(response.status()).toBe(400);
       const error = ApiValidationErrorResponse.parse(await response.json());
       expect(error.status).toBe(400);
@@ -164,22 +135,31 @@ test.describe("PUT /api/Categories", () => {
             key.toLowerCase() === field.toLowerCase() && messages.length > 0,
         ),
       ).toBe(true);
-      await expectStoredCategory(request, category, accessToken);
+      expect(await getCategory(category.name)).toContainEqual(category);
     });
   }
 
   test("returns 404 for a category that no longer exists", async ({
     request,
-    category,
+    createCategory,
+    deleteCategory,
     accessToken,
   }) => {
-    await deleteCategory(category.id, environment.testUser.id!);
+    // Arrange
+    const category = await createCategory({
+      name: `PUT test ${randomUUID()}`,
+      transactionType: "Expense",
+    });
+    await deleteCategory(category.id);
+    const updatedCategory = { ...category, name: "Missing category" };
 
-    const response = await request.put(`${environment.apiUrl}/api/Categories`, {
+    // Act
+    const response = await request.put(categoryUrl, {
       headers: { Authorization: `Bearer ${accessToken}` },
-      data: { ...category, name: "Missing category" },
+      data: updatedCategory,
     });
 
+    // Assert
     expect(response.status()).toBe(404);
     const error = ApiErrorResponse.parse(await response.json());
     expect(error.status).toBe(404);

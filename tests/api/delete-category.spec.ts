@@ -1,161 +1,124 @@
 import { randomUUID } from "node:crypto";
-import type { APIRequestContext } from "@playwright/test";
-import type * as z from "zod";
-import { test as base, expect } from "../../fixtures/access-token.fixture";
+import { test, expect } from "../../fixtures/index.fixture";
 import { environment } from "../../config/environment";
-import { deleteCategory } from "../../data/test-data-helper";
-import { ApiErrorResponse } from "../../zod/api-response.schema";
-import {
-  CategoryDeleteResponse,
-  CategoryResponse,
-} from "../../zod/category-response.schema";
-import { type TransactionType } from "../../types/transaction";
+import { CategoryDeleteResponse } from "../../zod/category-response.schema";
 
-type Category = z.infer<typeof CategoryResponse>;
-
-const test = base.extend<{
-  createCategory: (transactionType: TransactionType) => Promise<Category>;
-}>({
-  createCategory: async ({ request, accessToken }, use) => {
-    const categoryIds: number[] = [];
-
-    try {
-      await use(async (transactionType) => {
-        const response = await request.post(`${environment.apiUrl}/api/Categories`, {
-          headers: { Authorization: `Bearer ${accessToken}` },
-          data: {
-            name: `DELETE test ${randomUUID()}`,
-            transactionType,
-          },
-        });
-
-        const body = await response.json();
-        const { id } = CategoryResponse.pick({ id: true }).parse(body);
-        categoryIds.push(id);
-
-        expect(response.status()).toBe(200);
-        return CategoryResponse.parse(body);
-      });
-    } finally {
-      await Promise.all(
-        categoryIds.map((id) => deleteCategory(id, environment.testUser.id!)),
-      );
-    }
-  },
-});
-
-async function deleteCategoryThroughApi(
-  request: APIRequestContext,
-  categoryId: number,
-  accessToken: string,
-) {
-  const response = await request.delete(
-    `${environment.apiUrl}/api/Categories/${categoryId}`,
-    { headers: { Authorization: `Bearer ${accessToken}` } },
-  );
-
-  expect(response.status()).toBe(200);
-  return CategoryDeleteResponse.parse(await response.json());
-}
-
-async function expectCategoryMissing(
-  request: APIRequestContext,
-  categoryId: number,
-  accessToken: string,
-) {
-  const response = await request.get(
-    `${environment.apiUrl}/api/Categories/${categoryId}`,
-    { headers: { Authorization: `Bearer ${accessToken}` } },
-  );
-
-  expect(response.status()).toBe(404);
-  const error = ApiErrorResponse.parse(await response.json());
-  expect(error.status).toBe(404);
-}
+const categoryUrl = `${environment.apiUrl}/api/Categories`;
 
 test.describe("DELETE /api/Categories/{categoryId}", () => {
-  test.beforeAll(async () => {
-    if (!environment.testUser.id) {
-      throw new Error("TEST_USER_ID is required for category cleanup.");
-    }
-  });
-
   for (const transactionType of ["Income", "Expense"] as const) {
     test(`deletes an ${transactionType} category successfully`, async ({
       request,
       createCategory,
+      getCategory,
       accessToken,
     }) => {
-      const category = await createCategory(transactionType);
+      // Arrange
+      const category = await createCategory({
+        name: `DELETE test ${randomUUID()}`,
+        transactionType,
+      });
 
-      const result = await deleteCategoryThroughApi(
-        request,
-        category.id,
-        accessToken,
+      // Act
+      const response = await request.delete(
+        `${categoryUrl}/${category.id}`,
+        { headers: { Authorization: `Bearer ${accessToken}` } },
       );
 
+      // Assert
+      expect(response.status()).toBe(200);
+      const result = CategoryDeleteResponse.parse(await response.json());
       expect(result.isDeleted).toBe(true);
-      await expectCategoryMissing(request, category.id, accessToken);
+      expect(await getCategory(category.name)).toHaveLength(0);
     });
   }
 
   test("returns isDeleted false when the category does not exist", async ({
     request,
     createCategory,
+    deleteCategory,
+    getCategory,
     accessToken,
   }) => {
-    const category = await createCategory("Expense");
-    await deleteCategory(category.id, environment.testUser.id!);
-    await expectCategoryMissing(request, category.id, accessToken);
+    // Arrange
+    const category = await createCategory({
+      name: `DELETE test ${randomUUID()}`,
+      transactionType: "Expense",
+    });
+    await deleteCategory(category.id);
 
-    const result = await deleteCategoryThroughApi(request, category.id, accessToken);
+    // Act
+    const response = await request.delete(
+      `${categoryUrl}/${category.id}`,
+      { headers: { Authorization: `Bearer ${accessToken}` } },
+    );
 
+    // Assert
+    expect(response.status()).toBe(200);
+    const result = CategoryDeleteResponse.parse(await response.json());
     expect(result.isDeleted).toBe(false);
-    await expectCategoryMissing(request, category.id, accessToken);
+    expect(await getCategory(category.name)).toHaveLength(0);
   });
 
   test("returns isDeleted false when deleting the same category twice", async ({
     request,
     createCategory,
+    getCategory,
     accessToken,
   }) => {
-    const category = await createCategory("Income");
+    // Arrange
+    const category = await createCategory({
+      name: `DELETE test ${randomUUID()}`,
+      transactionType: "Income",
+    });
 
-    const firstResult = await deleteCategoryThroughApi(
-      request,
-      category.id,
-      accessToken,
+    // Act
+    const firstResponse = await request.delete(
+      `${categoryUrl}/${category.id}`,
+      { headers: { Authorization: `Bearer ${accessToken}` } },
     );
+    const secondResponse = await request.delete(
+      `${categoryUrl}/${category.id}`,
+      { headers: { Authorization: `Bearer ${accessToken}` } },
+    );
+
+    // Assert
+    expect(firstResponse.status()).toBe(200);
+    const firstResult = CategoryDeleteResponse.parse(await firstResponse.json());
     expect(firstResult.isDeleted).toBe(true);
-    await expectCategoryMissing(request, category.id, accessToken);
-
-    const secondResult = await deleteCategoryThroughApi(
-      request,
-      category.id,
-      accessToken,
-    );
+    expect(secondResponse.status()).toBe(200);
+    const secondResult = CategoryDeleteResponse.parse(await secondResponse.json());
     expect(secondResult.isDeleted).toBe(false);
-    await expectCategoryMissing(request, category.id, accessToken);
+    expect(await getCategory(category.name)).toHaveLength(0);
   });
 
   test("deletes only the requested category", async ({
     request,
     createCategory,
+    getCategory,
     accessToken,
   }) => {
-    const category = await createCategory("Expense");
-    const otherCategory = await createCategory("Income");
+    // Arrange
+    const category = await createCategory({
+      name: `DELETE test ${randomUUID()}`,
+      transactionType: "Expense",
+    });
+    const otherCategory = await createCategory({
+      name: `DELETE test ${randomUUID()}`,
+      transactionType: "Income",
+    });
 
-    const result = await deleteCategoryThroughApi(request, category.id, accessToken);
-    expect(result.isDeleted).toBe(true);
-    await expectCategoryMissing(request, category.id, accessToken);
-
-    const response = await request.get(
-      `${environment.apiUrl}/api/Categories/${otherCategory.id}`,
+    // Act
+    const response = await request.delete(
+      `${categoryUrl}/${category.id}`,
       { headers: { Authorization: `Bearer ${accessToken}` } },
     );
 
+    // Assert
     expect(response.status()).toBe(200);
-    expect(CategoryResponse.parse(await response.json())).toEqual(otherCategory);
+    const result = CategoryDeleteResponse.parse(await response.json());
+    expect(result.isDeleted).toBe(true);
+    expect(await getCategory(category.name)).toHaveLength(0);
+    expect(await getCategory(otherCategory.name)).toContainEqual(otherCategory);
   });
 });
