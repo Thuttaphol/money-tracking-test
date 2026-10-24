@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
-import { test, expect } from "../../fixtures/create-category.fixture";
-import { DetailCategoryPage } from "../../page-object-model/category-detail-page";
-import { environment } from "../../config/environment";
+import { test, expect } from "../../../fixtures/create-category.fixture";
+import { CategoryDetailPage } from "../../../page-object-model/category-detail-page";
+import { environment } from "../../../config/environment";
 
 test("change category name and transaction type to Expense successfully", async ({
   page,
@@ -16,7 +16,7 @@ test("change category name and transaction type to Expense successfully", async 
   await expect(page.getByText("ประเภทรายการ", { exact: true })).toBeVisible();
   await page.getByText(category.name).click();
 
-  const detailCategoryPage = new DetailCategoryPage(page);
+  const detailCategoryPage = new CategoryDetailPage(page);
 
   await detailCategoryPage.changeCategoryName(`แก้ไข ${category.name}`);
   await detailCategoryPage.changeTransactionType("Expense");
@@ -41,7 +41,7 @@ test("change category name and transaction type to Income successfully", async (
   await expect(page.getByText("ประเภทรายการ", { exact: true })).toBeVisible();
   await page.getByText(category.name).click();
 
-  const detailCategoryPage = new DetailCategoryPage(page);
+  const detailCategoryPage = new CategoryDetailPage(page);
 
   await detailCategoryPage.changeCategoryName(`แก้ไข ${category.name}`);
   await detailCategoryPage.changeTransactionType("Income");

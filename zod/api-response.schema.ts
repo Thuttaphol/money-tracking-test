@@ -16,3 +16,7 @@ export const ApiValidationErrorResponse = z.object({
   ...errorFields,
   errors: z.record(z.string(), z.array(z.string())),
 });
+
+const DeleteResponseSchema = z.object({
+  isDelete: z.boolean(),
+});

@@ -1,33 +1,20 @@
-import { test as base, expect } from "./access-token.fixture";
-import { environment } from "../config/environment";
-
-type DeleteCategoryResult = {
-  isDeleted: boolean;
-};
+import { test as base } from "./access-token.fixture";
+import { deleteCategory } from "../utils/category-helper";
 
 type CategoryFixtures = {
-  deleteCategory: (id: number) => Promise<DeleteCategoryResult>;
+  deleteCategory: (id: number) => Promise<void>;
 };
 
 export const test = base.extend<CategoryFixtures>({
   deleteCategory: async ({ request, accessToken }, use) => {
-    const removeCategory = async (id: number): Promise<DeleteCategoryResult> => {
-      const response = await request.delete(
-        `${environment.apiUrl}/api/Categories/${id}`,
-        {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        },
-      );
+    try {
+      const removeCategory = async (id: number): Promise<void> => {
+        await deleteCategory(request, accessToken, id);
+      };
 
-      expect(response.ok()).toBeTruthy();
-
-      const deleteResult: DeleteCategoryResult = await response.json();
-      return deleteResult;
-    };
-
-    await use(removeCategory);
+      await use(removeCategory);
+    } finally {
+    }
   },
 });
 

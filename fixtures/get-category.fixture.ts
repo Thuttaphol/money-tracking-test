@@ -1,7 +1,7 @@
 import { test as base, expect } from "./access-token.fixture";
-import { environment } from "../config/environment";
-
-type TransactionType = "Income" | "Expense";
+import { type TransactionType } from "../types/transaction";
+import { getCategory } from "../utils/category-helper";
+import { GetCategoryResponse } from "../zod/category-response.schema";
 
 type Category = {
   id: number;
@@ -16,18 +16,11 @@ type CategoryFixtures = {
 export const test = base.extend<CategoryFixtures>({
   getCategory: async ({ request, accessToken }, use) => {
     const loadCategory = async (name: string): Promise<Category[]> => {
-      const response = await request.get(`${environment.apiUrl}/api/Categories`, {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-        params: {
-          name: name,
-        },
-      });
+      const response = await getCategory(request, accessToken, name);
 
-      expect(response.ok()).toBeTruthy();
-      const category: Category[] = await response.json();
-      return category;
+      const result = GetCategoryResponse.parse(response);
+
+      return result;
     };
 
     await use(loadCategory);

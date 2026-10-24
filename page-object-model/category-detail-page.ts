@@ -1,8 +1,7 @@
 import { type Locator, type Page } from "@playwright/test";
+import { type TransactionType } from "../types/transaction";
 
-type TransactionType = "Income" | "Expense";
-
-export class DetailCategoryPage {
+export class CategoryDetailPage {
   readonly page: Page;
   readonly categoryHeader: Locator;
   readonly nameField: Locator;
