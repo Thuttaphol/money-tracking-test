@@ -1,11 +1,11 @@
-import { test, expect } from "../../fixtures/access-token.fixture";
-import { environment } from "../../config/environment";
+import { test, expect } from "../../../fixtures/access-token.fixture";
+import { environment } from "../../../config/environment";
 import {
   CategoryErrorInvalidName,
   CategoryErrorInvalidTransactionType,
   CategoryResponse,
-} from "../../zod/category-response.schema";
-import { deleteCategory } from "../../data/test-data-helper";
+} from "../../../zod/category-response.schema";
+import { deleteCategory } from "../../../data/test-data-helper";
 
 const categoryUrl = `${environment.apiUrl}/api/Categories`;
 

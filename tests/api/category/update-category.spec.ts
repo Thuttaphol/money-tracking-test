@@ -1,11 +1,11 @@
 import { randomUUID } from "node:crypto";
-import { test, expect } from "../../fixtures/index.fixture";
-import { environment } from "../../config/environment";
+import { test, expect } from "../../../fixtures/index.fixture";
+import { environment } from "../../../config/environment";
 import {
   ApiErrorResponse,
   ApiValidationErrorResponse,
-} from "../../zod/api-response.schema";
-import { CategoryResponse } from "../../zod/category-response.schema";
+} from "../../../zod/api-response.schema";
+import { CategoryResponse } from "../../../zod/category-response.schema";
 
 const categoryUrl = `${environment.apiUrl}/api/Categories`;
 
@@ -39,7 +39,9 @@ test.describe("PUT /api/Categories", () => {
       // Assert
       expect(response.status()).toBe(200);
       expect(CategoryResponse.parse(await response.json())).toEqual(updatedCategory);
-      expect(await getCategory(updatedCategory.name)).toContainEqual(updatedCategory);
+      expect(await getCategory(updatedCategory.name)).toContainEqual(
+        updatedCategory,
+      );
     });
   }
 
@@ -66,7 +68,9 @@ test.describe("PUT /api/Categories", () => {
       // Assert
       expect(response.status()).toBe(200);
       expect(CategoryResponse.parse(await response.json())).toEqual(updatedCategory);
-      expect(await getCategory(updatedCategory.name)).toContainEqual(updatedCategory);
+      expect(await getCategory(updatedCategory.name)).toContainEqual(
+        updatedCategory,
+      );
     });
   }
 

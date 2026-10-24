@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
-import { test, expect } from "../../fixtures/create-category.fixture";
-import { CategoryDetailPage } from "../../page-object-model/category-detail-page";
-import { environment } from "../../config/environment";
+import { test, expect } from "../../../fixtures/create-category.fixture";
+import { CategoryDetailPage } from "../../../page-object-model/category-detail-page";
+import { environment } from "../../../config/environment";
 
 test("change category name and transaction type to Expense successfully", async ({
   page,

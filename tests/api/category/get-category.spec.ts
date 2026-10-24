@@ -1,12 +1,12 @@
 import { randomUUID } from "node:crypto";
-import { test, expect } from "../../fixtures/index.fixture";
-import { environment } from "../../config/environment";
+import { test, expect } from "../../../fixtures/index.fixture";
+import { environment } from "../../../config/environment";
 import {
   CategoryErrorInvalidTransactionType,
   GetCategoryResponse,
-} from "../../zod/category-response.schema";
-import { testData } from "../../data/test-data";
-import { TransactionType } from "../../types";
+} from "../../../zod/category-response.schema";
+import { testData } from "../../../data/test-data";
+import { TransactionType } from "../../../types";
 
 const categoryUrl = `${environment.apiUrl}/api/Categories`;
 

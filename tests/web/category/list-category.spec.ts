@@ -1,9 +1,9 @@
 import { randomUUID } from "node:crypto";
-import { test, expect } from "../../fixtures/index.fixture";
-import { CategoryListPage } from "../../page-object-model/category-list-page";
-import { testData } from "../../data/test-data";
-import { type TransactionType } from "../../types/transaction";
-import { Category } from "../../types/category";
+import { test, expect } from "../../../fixtures/index.fixture";
+import { CategoryListPage } from "../../../page-object-model/category-list-page";
+import { testData } from "../../../data/test-data";
+import { type TransactionType } from "../../../types/transaction";
+import { Category } from "../../../types/category";
 
 test.describe.configure({ mode: "default" });
 test("open category list page and it has category success fully", async ({

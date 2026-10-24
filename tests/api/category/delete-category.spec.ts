@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
-import { test, expect } from "../../fixtures/index.fixture";
-import { environment } from "../../config/environment";
-import { CategoryDeleteResponse } from "../../zod/category-response.schema";
+import { test, expect } from "../../../fixtures/index.fixture";
+import { environment } from "../../../config/environment";
+import { CategoryDeleteResponse } from "../../../zod/category-response.schema";
 
 const categoryUrl = `${environment.apiUrl}/api/Categories`;
 
@@ -20,10 +20,9 @@ test.describe("DELETE /api/Categories/{categoryId}", () => {
       });
 
       // Act
-      const response = await request.delete(
-        `${categoryUrl}/${category.id}`,
-        { headers: { Authorization: `Bearer ${accessToken}` } },
-      );
+      const response = await request.delete(`${categoryUrl}/${category.id}`, {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
 
       // Assert
       expect(response.status()).toBe(200);
@@ -48,10 +47,9 @@ test.describe("DELETE /api/Categories/{categoryId}", () => {
     await deleteCategory(category.id);
 
     // Act
-    const response = await request.delete(
-      `${categoryUrl}/${category.id}`,
-      { headers: { Authorization: `Bearer ${accessToken}` } },
-    );
+    const response = await request.delete(`${categoryUrl}/${category.id}`, {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
 
     // Assert
     expect(response.status()).toBe(200);
@@ -73,14 +71,12 @@ test.describe("DELETE /api/Categories/{categoryId}", () => {
     });
 
     // Act
-    const firstResponse = await request.delete(
-      `${categoryUrl}/${category.id}`,
-      { headers: { Authorization: `Bearer ${accessToken}` } },
-    );
-    const secondResponse = await request.delete(
-      `${categoryUrl}/${category.id}`,
-      { headers: { Authorization: `Bearer ${accessToken}` } },
-    );
+    const firstResponse = await request.delete(`${categoryUrl}/${category.id}`, {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
+    const secondResponse = await request.delete(`${categoryUrl}/${category.id}`, {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
 
     // Assert
     expect(firstResponse.status()).toBe(200);
@@ -109,10 +105,9 @@ test.describe("DELETE /api/Categories/{categoryId}", () => {
     });
 
     // Act
-    const response = await request.delete(
-      `${categoryUrl}/${category.id}`,
-      { headers: { Authorization: `Bearer ${accessToken}` } },
-    );
+    const response = await request.delete(`${categoryUrl}/${category.id}`, {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
 
     // Assert
     expect(response.status()).toBe(200);
